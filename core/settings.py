@@ -12,11 +12,10 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 import os
 from pathlib import Path
-from env.env import load_env
+from env.load_env import load_environment_variables
 
 # LOADING ENVS
-load_env()
-print("database name", os.getenv("DB_ENGINE"))
+load_environment_variables()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -47,7 +46,6 @@ INSTALLED_APPS = [
     "django_extensions",
     # custom apps
     "apps.post",
-    "apps.test_app",
 ]
 
 MIDDLEWARE = [

@@ -4,5 +4,5 @@ from ...views.api import post_view
 
 urlpatterns = [
     # CRATE POST
-    path("", post_view.create_post_v1),
+    path("", post_view.create_post),
 ]

@@ -1,19 +1,14 @@
-from django.http import HttpResponse, JsonResponse
-from django.utils.html import escape
-from django.middleware.csrf import get_token
-from django.shortcuts import render, redirect
-
-from utils.helpers import success_response, error_response
-import pprint
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from ...serializers.post_serializer import PostCreateSerializer
 
 
-def create_post_v1(request):
-    if request.method == "POST":
-        content = request.POST.get("content")
-        if content:
-            # BlogPost.objects.create(title=title, content=content)
-            return success_response("data is inserted successfully")
-        else:
-            return error_response("title or content is missing")
-    else:
-        return error_response("http method is wrong")
+@api_view(["POST"])
+def create_post(request):
+    print("request data -------", request)
+    serializer = PostCreateSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
