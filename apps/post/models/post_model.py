@@ -1,12 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-
-
-class Tag(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-
-    def __str__(self):
-        return self.name
+from .tag_model import Tag
 
 
 class Post(models.Model):
@@ -38,7 +32,7 @@ class Post(models.Model):
     featured_image = models.ImageField(
         upload_to="featured_images/", blank=True, null=True
     )
-    comments_count = models.PositiveIntegerField(default=0)
+    comments_count = models.PositiveIntegerField(default=0)  # can be set virtually
     # boolean
     comments_enabled = models.BooleanField(default=True)
     # choices
@@ -55,8 +49,6 @@ class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     tags = models.ManyToManyField(Tag, blank=True)
     # data-time
-    scheduled_publish_time = models.DateTimeField(blank=True, null=True)
-    expiry_date = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -65,25 +57,3 @@ class Post(models.Model):
 
     def __str__(self):
         return f"Post #{self.pk} by {self.user.username}"
-
-
-class Comment(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    content = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ["created_at"]
-
-    def __str__(self):
-        return f"Comment #{self.pk} on Post #{self.post.pk} by {self.user.username}"
-
-
-class Like(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ("user", "post")
