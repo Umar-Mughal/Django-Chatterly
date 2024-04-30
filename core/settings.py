@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # installed apps
     "rest_framework",
+    "django_extensions",
     # custom apps
     "apps.post",
     "apps.test_app",
