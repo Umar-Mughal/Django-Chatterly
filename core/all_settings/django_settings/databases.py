@@ -1,8 +1,7 @@
 import os
 
 
-def get_database_settings():
-    print("db name =====", os.getenv("DB_NAME"))
+def get_databases_settings():
     return {
         "default": {
             "ENGINE": os.getenv("DB_ENGINE"),
