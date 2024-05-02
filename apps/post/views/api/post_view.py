@@ -74,7 +74,7 @@ class PostViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         # Customize the creation process here
-        dummy_user = User.objects.get(username="dummy_user")
+        dummy_user = User.objects.get(username="test")
         serializer.save(user=dummy_user)
         # You can perform additional actions such as sending notifications, etc.
 

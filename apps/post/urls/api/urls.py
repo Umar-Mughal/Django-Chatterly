@@ -3,7 +3,7 @@ from ...views.api import post_view
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
-router.register(r"posts", post_view.PostViewSet)
+router.register("", post_view.PostViewSet)
 
 urlpatterns = [path("", include(router.urls))]
 

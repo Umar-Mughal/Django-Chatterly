@@ -35,13 +35,13 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
-INSTALLED_APPS = settings.get("installed_apps")
+INSTALLED_APPS = settings["installed_apps"]()
 
-MIDDLEWARE = settings.get("middleware")
+MIDDLEWARE = settings["middleware"]()
 
 ROOT_URLCONF = "core.urls"
 
-TEMPLATES = settings.get("templates")
+TEMPLATES = settings["templates"]()
 
 WSGI_APPLICATION = "core.wsgi.application"
 
@@ -49,12 +49,12 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = settings.get("db")
+DATABASES = settings["db"]()
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
-AUTH_PASSWORD_VALIDATORS = settings.get("auth_password_validators")
+AUTH_PASSWORD_VALIDATORS = settings["auth_password_validators"]()
 
 
 # Internationalization
@@ -78,3 +78,8 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+"""
+THIRD PARTY SETTINGS
+"""
+REST_FRAMEWORK = settings["rest_framework"]()

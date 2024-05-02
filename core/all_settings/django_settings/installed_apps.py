@@ -6,9 +6,10 @@ def get_installed_apps_settings():
         "django.contrib.sessions",
         "django.contrib.messages",
         "django.contrib.staticfiles",
-        # installed apps
+        # third party apps
         "rest_framework",
         "django_extensions",
         # custom apps
         "apps.post",
+        "apps.custom_auth",
     ]
