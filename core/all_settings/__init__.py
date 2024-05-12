@@ -1,22 +1,21 @@
-from .django_settings.databases import get_databases_settings
-from .django_settings.installed_apps import get_installed_apps_settings
-from .django_settings.middleware import get_middleware_settings
-from .django_settings.templates import get_templates_settings
-from .django_settings.auth_password_validators import (
-    get_auth_password_validators_settings,
+from .django_settings import (
+    databases,
+    installed_apps,
+    middleware,
+    templates,
+    auth_password_validators,
 )
 
 # third party settings
-from .third_party_settings.django_rest_framework import (
-    get_django_rest_framework_settings,
-)
+from .third_party_settings import rest_framework, simple_jwt
 
 settings = {
-    "db": get_databases_settings,
-    "installed_apps": get_installed_apps_settings,
-    "middleware": get_middleware_settings,
-    "templates": get_templates_settings,
-    "auth_password_validators": get_auth_password_validators_settings,
+    "databases": databases,
+    "installed_apps": installed_apps,
+    "middleware": middleware,
+    "templates": templates,
+    "auth_password_validators": auth_password_validators,
     # third party settings
-    "rest_framework": get_django_rest_framework_settings,
+    "rest_framework": rest_framework,
+    "simple_jwt": simple_jwt,
 }

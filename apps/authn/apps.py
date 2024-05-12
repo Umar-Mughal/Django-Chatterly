@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class AuthConfig(AppConfig):
+class AuthnConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "apps.custom_auth"
+    name = "apps.authn"

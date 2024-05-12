@@ -49,7 +49,7 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = settings["db"]()
+DATABASES = settings["databases"]()
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -83,3 +83,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 THIRD PARTY SETTINGS
 """
 REST_FRAMEWORK = settings["rest_framework"]()
+SIMPLE_JWT = settings["simple_jwt"]()
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]
+
+AUTH_USER_MODEL = "user.User"
