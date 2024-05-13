@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from apps.post.models.post_model import Post
 from apps.post.models.tag_model import Tag
-from apps.user.models.user_model import User
+from apps.authsys.models.user_model import User
 
 
 class PostSerializer(serializers.Serializer):
