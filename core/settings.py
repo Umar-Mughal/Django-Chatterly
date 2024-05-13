@@ -88,4 +88,4 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
 
-AUTH_USER_MODEL = "authsys.User"
+AUTH_USER_MODEL = "authentication.User"

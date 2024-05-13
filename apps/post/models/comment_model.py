@@ -1,6 +1,6 @@
 from django.db import models
 from .post_model import Post
-from apps.authsys.models import User
+from apps.authentication.models import User
 
 
 class Comment(models.Model):

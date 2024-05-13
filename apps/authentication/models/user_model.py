@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from django.contrib.auth.validators import UnicodeUsernameValidator
-from apps.authsys.managers import UserManager
+from apps.authentication.managers import UserManager
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -26,6 +26,9 @@ class User(AbstractBaseUser, PermissionsMixin):
         upload_to="profile_pics/", blank=True, null=True
     )
     bio = models.TextField(blank=True, null=True)
+    # is_email_verified = models.BooleanField(default=False)
+    # otp = models.CharField(max_length=6, null=True, blank=True)
+
     # phone_number = models.CharField(
     #     max_length=15,
     # )

@@ -4,9 +4,9 @@ from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.response import Response
 from rest_framework.decorators import action, permission_classes, api_view
 from rest_framework import status
-from apps.authsys.models.user_model import User
+from apps.authentication.models.user_model import User
 
-from apps.authsys.serializers.user_serializer import UserSerializer
+from apps.authentication.serializers.user_serializer import UserSerializer
 
 
 @api_view(["POST"])

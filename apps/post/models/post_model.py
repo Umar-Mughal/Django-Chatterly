@@ -1,5 +1,5 @@
 from django.db import models
-from apps.authsys.models import User
+from apps.authentication.models import User
 from .tag_model import Tag
 
 
