@@ -1,31 +1,32 @@
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.response import Response
-from rest_framework.decorators import action
+from rest_framework.decorators import action, permission_classes
 from rest_framework import status
 from apps.user.models.user_model import User
 
 from apps.user.serializers.user_serializer import UserSerializer
 
+"""
+Making use of GenericViewSet, because only needed user creation (registration) and updation, and also custom  methods. No need for users list, and retrieve single user by id. So that's the perfect use case of using  GenericViewSet, of course URLs for custom methods will be automatically generated as well, based on thier names. So that's the benefit we get with viewsets.
 
-class UserViewSet(ModelViewSet):
+Also I needed to user create_user method for creation, that was also the reason to to customize create method. 
+
+"""
+
+
+class UserViewSet(GenericViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated]
-    http_method_names = ["post", "update", "get", "head"]
 
-    def list(self, request, *args, **kwargs):
-        raise MethodNotAllowed("GET")
+    def get_permissions(self):
+        if self.action == "create":
+            return []
+        else:
+            return [IsAuthenticated()]
 
-    def retrieve(self, request, *args, **kwargs):
-        raise MethodNotAllowed("GET")
-
-    """
-    I am customizing create method so that I could call create_user, otherwise the default implementation would have been fine. Also need to send an email after successful registeration.
-    """
-
-    def create(self, request, *args, **kwargs):
+    def create(self, request):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             user = User.objects.create_user(**serializer.data)
