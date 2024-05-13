@@ -4,9 +4,9 @@ from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.response import Response
 from rest_framework.decorators import action, permission_classes
 from rest_framework import status
-from apps.user.models.user_model import User
+from apps.authsys.models.user_model import User
 
-from apps.user.serializers.user_serializer import UserSerializer
+from apps.authsys.serializers.user_serializer import UserSerializer
 
 """
 Making use of GenericViewSet, because only needed user creation (registration) and updation, and also custom  methods. No need for users list, and retrieve single user by id. So that's the perfect use case of using  GenericViewSet, of course URLs for custom methods will be automatically generated as well, based on thier names. So that's the benefit we get with viewsets.

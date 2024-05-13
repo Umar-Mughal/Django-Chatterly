@@ -28,9 +28,8 @@ def installed_apps():
         "django.contrib.messages",
         "django.contrib.staticfiles",
         # custom apps
+        "apps.authsys",
         "apps.post",
-        "apps.user",
-        "apps.authn",
         # third party apps
         "rest_framework",
         "django_extensions",

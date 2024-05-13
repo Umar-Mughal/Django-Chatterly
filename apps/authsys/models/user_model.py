@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from django.contrib.auth.validators import UnicodeUsernameValidator
-from apps.user.managers import UserManager
+from apps.authsys.managers import UserManager
 
 
 class User(AbstractBaseUser, PermissionsMixin):
