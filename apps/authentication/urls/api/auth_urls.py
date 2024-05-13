@@ -8,6 +8,7 @@ from apps.authentication.views.api import authn_view
 urlpatterns = [
     # USER MANAGEMENT (CRUD)
     path("/register/", user_view.user_create, name="create-account"),
+    path("/verify-email/", user_view.user_create, name="verify-email"),
     path("/my-account/", user_view.user_get, name="get-account"),
     path("/update/", user_view.user_update, name="update-account"),
     path("/delete/", user_view.user_delete, name="delete-account"),
