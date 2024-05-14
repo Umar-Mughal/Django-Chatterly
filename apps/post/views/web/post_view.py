@@ -1,4 +1,4 @@
-from utils.helpers import success_response, error_response
+from utils.response_util import success_response, error_response
 
 
 def create_post_v1(request):

@@ -1,30 +1,25 @@
 # PACKAGES
-from django.contrib.sites.shortcuts import get_current_site
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import permission_classes, api_view
 from rest_framework import status
-from django.urls import reverse
 
 # MODELS
 from apps.authentication.models import User
+from apps.authentication.models import EmailVerification
 
 # SERIALIZER
 from apps.authentication.serializers.user_serializer import UserSerializer
 
 # UTILS
-from apps.authentication.utils import Util
+from utils.jwt_util import verify_token
 
 
 @api_view(["POST"])
 def user_create(request):
-    serializer = UserSerializer(data=request.data)
+    serializer = UserSerializer(data=request.data, context={"request": request})
     if serializer.is_valid():
-        User.objects.create_user(**serializer.validated_data)
-        # Send registration email
-        # send_registration_email(request, serializer.validated_data)
-        # Send response
+        serializer.save()
         return Response(
             "Your registration has been successful. Please verify your email.",
             status=status.HTTP_201_CREATED,
@@ -32,26 +27,37 @@ def user_create(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-def send_registration_email(request, data):
-    user = User.objects.get(email=data["email"])
-    access_token = RefreshToken.for_user(user).access_token
-    current_site = get_current_site(request)
-    domain = current_site.domain
-    relative_link = reverse("verify-email")
-    url = "http://" + domain + relative_link + "?token=" + str(access_token)
-    # EMAIL DATA
-    to = [user.email]
-    subject = "Verify your email"
-    body = (
-        "Hi " + user.first_name + " use this link below to verify your email \n" + url
-    )
-    data = {"to": to, "subject": subject, "body": body}
-    Util.send_email(data)
-
-
 @api_view(["GET"])
 def verify_email(request):
-    pass
+    try:
+        token = request.query_params.get("token")
+        if not token:
+            raise ValueError("Token is not provided")
+        decoded_token = verify_token(token)
+        if decoded_token is None:
+            raise ValueError("Token is invalid or expired")
+
+        user_id = decoded_token["user_id"]
+        user = User.objects.get(pk=user_id)
+        if user.is_email_verified:
+            return Response(
+                "Email already verified",
+            )
+        code = decoded_token["data"]["code"]
+        email_verification_instance = EmailVerification.objects.get(
+            user=user_id, code=code
+        )
+        user.is_email_verified = True
+        user.save()
+        return Response("Email verified successfully")
+    except User.DoesNotExist as e:
+        return Response(
+            "Token is invalid or expired", status=status.HTTP_400_BAD_REQUEST
+        )
+    except ValueError as e:
+        return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response("Something went wrong!!!", status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["GET"])
