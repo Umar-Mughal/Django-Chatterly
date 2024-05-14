@@ -5,13 +5,23 @@ from apps.authentication.managers import UserManager
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-
+    # First name
     first_name = models.CharField(max_length=150)
+    # Last name
     last_name = models.CharField(max_length=150)
+    # Gender
+    GENDER_CHOICES = [("M", "Male"), ("F", "Female"), ("O", "Other")]
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
+    # Date of birth
+    date_of_birth = models.DateField()
+    # Email
     email = models.EmailField(
         unique=True, error_messages={"unique": "Email has been already been taken"}
     )
+    # Password
     password = models.CharField(max_length=128)
+    """OTHER FIELDS: ON"""
+    # Username
     username = models.CharField(
         max_length=150,
         unique=True,
@@ -22,19 +32,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-    profile_picture = models.ImageField(
-        upload_to="profile_pics/", blank=True, null=True
-    )
-    bio = models.TextField(blank=True, null=True)
-    # is_email_verified = models.BooleanField(default=False)
-    # otp = models.CharField(max_length=6, null=True, blank=True)
+    is_email_verified = models.BooleanField(default=False)
 
     # phone_number = models.CharField(
     #     max_length=15,
     # )
-    # date_of_birth = models.DateField()
-    # GENDER_CHOICES = [("M", "Male"), ("F", "Female"), ("O", "Other")]
-    # gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     # last_login = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)

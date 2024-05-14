@@ -1,6 +1,6 @@
 # PACKAGES
 from django.contrib.sites.shortcuts import get_current_site
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import permission_classes, api_view
@@ -8,7 +8,7 @@ from rest_framework import status
 from django.urls import reverse
 
 # MODELS
-from apps.authentication.models.user_model import User
+from apps.authentication.models import User
 
 # SERIALIZER
 from apps.authentication.serializers.user_serializer import UserSerializer
@@ -22,8 +22,9 @@ def user_create(request):
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
         User.objects.create_user(**serializer.validated_data)
-        # SEND REGISTRATION EMAIL
-        send_registration_email(request, serializer.validated_data)
+        # Send registration email
+        # send_registration_email(request, serializer.validated_data)
+        # Send response
         return Response(
             "Your registration has been successful. Please verify your email.",
             status=status.HTTP_201_CREATED,
@@ -37,17 +38,14 @@ def send_registration_email(request, data):
     current_site = get_current_site(request)
     domain = current_site.domain
     relative_link = reverse("verify-email")
-    abs_url = (
-        "http://" + current_site.domain + relative_link + "?token=" + str(access_token)
+    url = "http://" + domain + relative_link + "?token=" + str(access_token)
+    # EMAIL DATA
+    to = [user.email]
+    subject = "Verify your email"
+    body = (
+        "Hi " + user.first_name + " use this link below to verify your email \n" + url
     )
-    email_body = (
-        "Hi "
-        + user.first_name
-        + " use this link below to verify your email /n "
-        + abs_url
-    )
-    data = {"to": [user.email], "subject": "Verify your email", "body": email_body}
-
+    data = {"to": to, "subject": subject, "body": body}
     Util.send_email(data)
 
 

@@ -1,5 +1,5 @@
 from django.db import models
-from .post_model import Post
+from apps.post.models import Post
 from apps.authentication.models import User
 
 
@@ -9,4 +9,4 @@ class Like(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ("user", "post")
+        unique_together = ("user_id", "post_id")

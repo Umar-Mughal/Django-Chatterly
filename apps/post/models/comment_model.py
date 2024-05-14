@@ -1,5 +1,5 @@
 from django.db import models
-from .post_model import Post
+from apps.post.models import Post
 from apps.authentication.models import User
 
 
