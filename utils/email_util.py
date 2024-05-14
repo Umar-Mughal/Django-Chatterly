@@ -1,7 +1,7 @@
-from django.core.mail import EmailMessage, send_mail
+from django.core.mail import EmailMessage
 
 
-class Util:
+class EmailUtil:
     @staticmethod
     def send_email(data):
         email = EmailMessage(

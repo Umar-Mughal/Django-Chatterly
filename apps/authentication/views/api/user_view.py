@@ -3,28 +3,36 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import permission_classes, api_view
 from rest_framework import status
+from django.shortcuts import get_object_or_404
+
 
 # MODELS
 from apps.authentication.models import User
 from apps.authentication.models import EmailVerification
 
 # SERIALIZER
-from apps.authentication.serializers.user_serializer import UserSerializer
+from apps.authentication.serializers.user.user_serializer import (
+    UserSerializer,
+    ResendVerifyEmailSerializer,
+)
 
 # UTILS
-from utils.jwt_util import verify_token
+from utils import JWTUtil
+from apps.authentication.utils import RegisterUtil
 
 
 @api_view(["POST"])
 def user_create(request):
+    # Validation
     serializer = UserSerializer(data=request.data, context={"request": request})
-    if serializer.is_valid():
-        serializer.save()
-        return Response(
-            "Your registration has been successful. Please verify your email.",
-            status=status.HTTP_201_CREATED,
-        )
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer.is_valid(raise_exception=True)  # throw exception and don't proceed
+    # Saving data
+    serializer.save()
+    # Sending response
+    return Response(
+        "Your registration has been successful. Please verify your email.",
+        status=status.HTTP_201_CREATED,
+    )
 
 
 @api_view(["GET"])
@@ -33,7 +41,7 @@ def verify_email(request):
         token = request.query_params.get("token")
         if not token:
             raise ValueError("Token is not provided")
-        decoded_token = verify_token(token)
+        decoded_token = JWTUtil.verify_token(token)
         if decoded_token is None:
             raise ValueError("Token is invalid or expired")
 
@@ -58,6 +66,19 @@ def verify_email(request):
         return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response("Something went wrong!!!", status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["GET"])
+def resend_verify_email(request):
+    # VALIDATION
+    serializer = ResendVerifyEmailSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    email = serializer.validated_data["email"]
+    user = get_object_or_404(User, email="umar@gmail.com")
+    if user.is_email_verified:
+        return Response("Email is already verified", status=status.HTTP_403_FORBIDDEN)
+    # RegisterUtil.send_email_verify_email(request, email)
+    return Response("Verification email sent. Please check your email")
 
 
 @api_view(["GET"])

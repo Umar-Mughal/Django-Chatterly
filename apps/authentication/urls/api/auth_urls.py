@@ -5,11 +5,16 @@ from django.urls import path
 from apps.authentication.views.api import user_view
 from apps.authentication.views.api import authn_view
 
+
 urlpatterns = [
     # USER MANAGEMENT (CRUD)
-    # path("/register/", user_view.CreateUser.as_view(), name="create-account"),
     path("/register/", user_view.user_create, name="create-account"),
     path("/verify-email/", user_view.verify_email, name="verify-email"),
+    path(
+        "/resend-verify-email/",
+        user_view.resend_verify_email,
+        name="resend-verify-email",
+    ),
     path("/my-account/", user_view.user_get, name="get-account"),
     path("/update/", user_view.user_update, name="update-account"),
     path("/delete/", user_view.user_delete, name="delete-account"),

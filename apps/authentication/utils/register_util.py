@@ -1,65 +1,16 @@
 # Packages
-from django.utils import timezone
-from django.urls import reverse
-from django.contrib.sites.shortcuts import get_current_site
-from rest_framework import serializers
-from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 import random
-from django.conf import settings
+from django.utils import timezone
+from datetime import timedelta
+from django.urls import reverse
+from django.contrib.sites.shortcuts import get_current_site
 
 # Models
-from apps.authentication.models import User
-from apps.authentication.models import EmailVerification
+from apps.authentication.models import User, EmailVerification
 
 # Utils
-from apps.authentication.utils import Util
-
-
-class UserSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = User
-        fields = [
-            "id",
-            "first_name",
-            "last_name",
-            "gender",
-            "date_of_birth",
-            "last_name",
-            "email",
-            "password",
-            "is_email_verified",
-        ]
-        read_only_fields = [
-            "id",
-            "is_email_verified",
-        ]  # Make id field read-only (for update)
-        write_only_fields = ["password"]
-
-    def create(self, validated_data):
-        email = validated_data["email"].lower()
-        validated_data["email"] = email
-        validated_data["username"] = RegisterUtil.generate_unique_username(
-            validated_data["email"]
-        )
-
-        user = User.objects.create_user(validated_data)
-        # Send email verification email
-        request = self.context.get("request")
-        RegisterUtil.send_email_verify_email(request, email)
-        return user
-
-    def update(self, instance, validated_data):
-        password = validated_data.pop(
-            "password", None
-        )  # Remove password from validated data if not provided
-        if password is not None:
-            instance.set_password(password)
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-        return instance
+from utils import EmailUtil
 
 
 class RegisterUtil:
@@ -98,7 +49,7 @@ class RegisterUtil:
         )
         data = {"to": to, "subject": subject, "body": body}
         # Send email
-        Util.send_email(data)
+        EmailUtil.send_email(data)
 
     @staticmethod
     def generate_six_digit_unique_code():
@@ -127,7 +78,7 @@ class RegisterUtil:
             "data": {
                 "code": code,
             },
-            "exp": timezone.now() + settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"],
+            "exp": timezone.now() + timedelta(minutes=2),
         }
         token = RefreshToken.for_user(user)
         token.payload.update(custom_payload)
