@@ -29,11 +29,9 @@ class RegisterUtil:
     def send_verify_email(request, email):
         user = User.objects.get(email=email)
         # Six-digit code as well for extra security
-        email_verification_code = RegisterUtil.update_or_create_code(user)
+        code = RegisterUtil.update_or_create_code(user)
 
-        access_token = RegisterUtil.generate_jwt_access_token(
-            user, email_verification_code
-        )
+        access_token = RegisterUtil.generate_jwt_access_token(user, code)
         current_site = get_current_site(request)
         domain = current_site.domain
         relative_link = reverse("verify-email")

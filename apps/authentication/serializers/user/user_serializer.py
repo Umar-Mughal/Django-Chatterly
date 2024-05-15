@@ -1,6 +1,7 @@
 # Packages
 
 from rest_framework import serializers
+from django.shortcuts import reverse
 
 
 # Models
@@ -8,7 +9,8 @@ from apps.authentication.models import User
 from apps.authentication.models import EmailVerification
 
 # Utils
-from apps.authentication.utils import RegisterUtil
+from apps.authentication.utils import RegisterUtil, EmailContentUtil
+from utils import EmailVerificationUtil
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -40,9 +42,13 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
         user = User.objects.create_user(validated_data)
-        # Send email verification email
         request = self.context.get("request")
-        RegisterUtil.send_verify_email(request, email)
+        EmailVerificationUtil.send_verification_email(
+            request,
+            user,
+            reverse("verify-email"),
+            EmailContentUtil.register_email_content,
+        )
         return user
 
     def update(self, instance, validated_data):

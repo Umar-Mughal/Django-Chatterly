@@ -8,7 +8,7 @@ from rest_framework.decorators import (
 )
 from rest_framework import status
 from rest_framework.permissions import AllowAny
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, reverse
 
 # MODELS
 from apps.authentication.models import User
@@ -22,7 +22,8 @@ from apps.authentication.serializers.user.user_serializer import (
 
 # UTILS
 from utils import JWTUtil, NoAuthentication
-from apps.authentication.utils import RegisterUtil
+from apps.authentication.utils import EmailContentUtil
+from apps.authentication.utils.email.email_util import EmailVerificationUtil
 from utils.exceptions import InvalidToken
 
 
@@ -81,7 +82,6 @@ def verify_email(request):
 
 @api_view(["GET"])
 def resend_email_verification_email(request):
-    return Response("hello world")
     # 1. Validation
     srl = ResendVerifyEmailSerializer(data=request.data)
     srl.is_valid(raise_exception=True)
@@ -95,7 +95,12 @@ def resend_email_verification_email(request):
         return Response("Email is already verified", status=status.HTTP_403_FORBIDDEN)
 
     # 4. Send email
-    # RegisterUtil.send_email_verify_email(request, email)
+    EmailVerificationUtil.send_verification_email(
+        request,
+        user,
+        reverse("verify-email"),
+        EmailContentUtil.register_email_content,
+    )
     return Response("Verification email sent. Please check your email")
 
 
@@ -110,11 +115,35 @@ def user_get(request):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 
+# @api_view(["POST"])
+# def send_password_reset_email(request):
+#     return Response(
+#         "Sending password reset email is pending. This will be trigerred when forntend will send an email in forgot password"
+#     )
+
+
 @api_view(["POST"])
 def send_password_reset_email(request):
-    return Response(
-        "Sending password reset email is pending. This will be trigerred when forntend will send an email in forgot password"
+    # 1. Validation
+    srl = ResendVerifyEmailSerializer(data=request.data)
+    srl.is_valid(raise_exception=True)
+
+    # 2. Get user or send 404
+    email = email = srl.validated_data["email"]
+    user = get_object_or_404(User, email=email)
+
+    # 3. Check if email is already verified
+    if user.is_email_verified:
+        return Response("Email is already verified", status=status.HTTP_403_FORBIDDEN)
+
+    # 4. Send email
+    EmailVerificationUtil.send_verification_email(
+        request,
+        user,
+        reverse("verify-email"),
+        EmailContentUtil.register_email_content,
     )
+    return Response("Verification email sent. Please check your email")
 
 
 @api_view(["POST"])
