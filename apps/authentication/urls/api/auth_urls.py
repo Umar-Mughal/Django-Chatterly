@@ -12,13 +12,21 @@ urlpatterns = [
     path("/register/", user_view.user_create, name="create-account"),
     path("/verify-email/", user_view.verify_email, name="verify-email"),
     path(
-        "/resend-verify-email/",
-        user_view.resend_verify_email,
-        name="resend-verify-email",
+        "/resend-email-verification-email/",
+        user_view.resend_email_verification_email,
+        name="resend-email-verification-email",
     ),
     # 2. RESET PASSWORD
-    path("/password-reset/", user_view.user_get, name="password-reset"),
-    path("/password-reset-confirm/", user_view.user_get, name="password-reset-confirm"),
+    path(
+        "/forgot-password/",
+        user_view.send_password_reset_email,
+        name="send-password-reset-email",
+    ),
+    path(
+        "/reset-password/",
+        user_view.reset_password,
+        name="reset-password",
+    ),
     # 3. GET ACCOUNT
     path("/my-account/", user_view.user_get, name="get-account"),
     # 4. UPDATE ACCOUNT

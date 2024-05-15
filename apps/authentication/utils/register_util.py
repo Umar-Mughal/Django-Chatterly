@@ -26,9 +26,9 @@ class RegisterUtil:
         return username
 
     @staticmethod
-    def send_email_verify_email(request, email):
+    def send_verify_email(request, email):
         user = User.objects.get(email=email)
-        # Six digit code as well for extra security
+        # Six-digit code as well for extra security
         email_verification_code = RegisterUtil.update_or_create_code(user)
 
         access_token = RegisterUtil.generate_jwt_access_token(

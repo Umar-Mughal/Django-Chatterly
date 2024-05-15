@@ -42,7 +42,7 @@ class UserSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(validated_data)
         # Send email verification email
         request = self.context.get("request")
-        RegisterUtil.send_email_verify_email(request, email)
+        RegisterUtil.send_verify_email(request, email)
         return user
 
     def update(self, instance, validated_data):

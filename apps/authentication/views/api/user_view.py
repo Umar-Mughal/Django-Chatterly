@@ -23,6 +23,7 @@ from apps.authentication.serializers.user.user_serializer import (
 # UTILS
 from utils import JWTUtil, NoAuthentication
 from apps.authentication.utils import RegisterUtil
+from utils.exceptions import InvalidToken
 
 
 @api_view(["POST"])
@@ -53,7 +54,7 @@ def verify_email(request):
         user_id = decoded_token["user_id"]
         user = User.objects.get(pk=user_id)
         if not user:
-            raise ValueError("Token is invalid or expired")
+            raise InvalidToken("Token is invalid or expired")
 
         if user.is_email_verified:
             raise ValueError("Email is already verified")
@@ -64,7 +65,7 @@ def verify_email(request):
             user=user_id, code=code
         )
         if not email_verification_instance:
-            raise ValueError("Token is invalid or expired")
+            raise InvalidToken("Token code is invalid or expired")
 
         email_verification_instance.delete()
 
@@ -74,16 +75,13 @@ def verify_email(request):
 
         # 5. Send response
         return Response("Email verified successfully")
-    except ValueError as e:
+    except (InvalidToken, ValueError) as e:
         return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
-        return Response(
-            "Something went wrong!!!", status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
 
 
 @api_view(["GET"])
-def resend_verify_email(request):
+def resend_email_verification_email(request):
+    return Response("hello world")
     # 1. Validation
     srl = ResendVerifyEmailSerializer(data=request.data)
     srl.is_valid(raise_exception=True)
@@ -110,6 +108,19 @@ def user_get(request):
         return Response(serializer.data)
     except User.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(["POST"])
+def send_password_reset_email(request):
+    return Response(
+        "Sending password reset email is pending. This will be trigerred when forntend will send an email in forgot password"
+    )
+
+
+@api_view(["POST"])
+def reset_password(request):
+    # A user will submit request with the token which was sent in send_password_reset_email
+    return Response("Reset your password Pending")
 
 
 @api_view(["DELETE"])
