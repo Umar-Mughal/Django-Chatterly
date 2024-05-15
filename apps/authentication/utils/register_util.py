@@ -51,12 +51,12 @@ class RegisterUtil:
         # Send email
         EmailUtil.send_email(data)
 
-    @staticmethod
-    def generate_six_digit_unique_code():
+    @classmethod
+    def generate_six_digit_unique_code(cls):
         return "".join([str(random.randint(0, 9)) for _ in range(6)])
 
-    @staticmethod
-    def update_or_create_code(user):
+    @classmethod
+    def update_or_create_code(cls, user):
         code = RegisterUtil.generate_six_digit_unique_code()
         data = {"code": code, "sent_at": timezone.now()}
         unique_criteria = {"user": user}
@@ -71,8 +71,8 @@ class RegisterUtil:
 
         return code
 
-    @staticmethod
-    def generate_jwt_access_token(user, code):
+    @classmethod
+    def generate_jwt_access_token(cls, user, code):
         custom_payload = {
             "user_id": user.id,
             "data": {
