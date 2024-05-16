@@ -9,8 +9,7 @@ from apps.authentication.models import User
 from apps.authentication.models import EmailVerification
 
 # Utils
-from apps.authentication.utils import RegisterUtil, EmailContentUtil
-from utils import EmailVerificationUtil
+from apps.authentication.utils import RegisterUtil, SendAuthEmailUtil
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -43,11 +42,8 @@ class UserSerializer(serializers.ModelSerializer):
 
         user = User.objects.create_user(validated_data)
         request = self.context.get("request")
-        EmailVerificationUtil.send_verification_email(
-            request,
-            user,
-            reverse("verify-email"),
-            EmailContentUtil.register_email_content,
+        SendAuthEmailUtil.send_verification_email(
+            request, user, SendAuthEmailUtil.EMAIL_TYPES["register"]
         )
         return user
 
@@ -63,5 +59,5 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
 
 
-class ResendVerifyEmailSerializer(serializers.Serializer):
+class EmailSerializer(serializers.Serializer):
     email = serializers.EmailField()
