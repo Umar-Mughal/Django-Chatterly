@@ -18,20 +18,6 @@ from utils import EmailUtil
 from utils.exceptions import InvalidToken
 
 
-# class EmailContent:
-#     @staticmethod
-#     def register_email_content(user, url):
-#         subject = "Welcome to our platform!"
-#         body = f"Hi {user.first_name}, welcome to our platform! Please verify your email address by clicking the link below:\n{url}"
-#         return subject, body
-#
-#     @staticmethod
-#     def reset_password_email_content(user, url):
-#         subject = "Password reset request"
-#         body = f"Hi {user.first_name}, you request a password reset, Click the link below to reset your password:\n {url}"
-#         return subject, body
-
-
 class SendAuthEmailUtil:
     EMAIL_TYPES = EmailVerification.EMAIL_TYPES
     MODEL = EmailVerification
@@ -123,19 +109,38 @@ class VerifyAuthEmailUtil:
         except SimpleJWTInvalidToken as e:
             raise InvalidToken("Token is invalid")
 
-
-class EmailContentUtil:
-    @staticmethod
-    def register_email_content(user, url):
-        subject = "Welcome to our platform!"
-        body = f"Hi {user.first_name}, welcome to our platform! Please verify your email address by clicking the link below:\n{url}"
-        return subject, body
+    """
+    Verify six-digit code, that we put for extra security & delete it to clean up database, if not found raise an exception that token is invalid
+    """
 
     @staticmethod
-    def reset_password_email_content(user, url):
-        subject = "Password reset request"
-        body = f"Hi {user.first_name}, you request a password reset, Click the link below to reset your password:\n {url}"
-        return subject, body
+    def verify_code(decoded_token):
+        try:
+            user_id = decoded_token["user_id"]
+            code = decoded_token["data"]["code"]
+            email_type = decoded_token["data"]["email_type"]
 
-    #         subject = "Password Reset Request"
-    #         body = f"Hi {user.first_name}, you requested a password reset. Click the link below to reset your password: {url}"
+            email_verification_instance = EmailVerification.objects.get(
+                user=user_id, code=code, email_type=email_type
+            )
+
+            email_verification_instance.delete()
+        except EmailVerification.DoesNotExist as e:
+            raise InvalidToken("Token code is invalid or expired")
+
+
+# class EmailContentUtil:
+#     @staticmethod
+#     def register_email_content(user, url):
+#         subject = "Welcome to our platform!"
+#         body = f"Hi {user.first_name}, welcome to our platform! Please verify your email address by clicking the link below:\n{url}"
+#         return subject, body
+#
+#     @staticmethod
+#     def reset_password_email_content(user, url):
+#         subject = "Password reset request"
+#         body = f"Hi {user.first_name}, you request a password reset, Click the link below to reset your password:\n {url}"
+#         return subject, body
+#
+#     #         subject = "Password Reset Request"
+#     #         body = f"Hi {user.first_name}, you requested a password reset. Click the link below to reset your password: {url}"

@@ -18,11 +18,12 @@ from apps.authentication.models import EmailVerification
 from apps.authentication.serializers.user.user_serializer import (
     UserSerializer,
     EmailSerializer,
+    ResetPasswordSerializer,
 )
 
 # UTILS
 from utils import JWTUtil, NoAuthentication
-from apps.authentication.utils import SendAuthEmailUtil
+from apps.authentication.utils import SendAuthEmailUtil, VerifyAuthEmailUtil
 from utils.exceptions import InvalidToken
 
 
@@ -48,7 +49,9 @@ def user_create(request):
 def verify_email(request):
     try:
         # 1. Verify token
-        decoded_token = JWTUtil.verify_token(request.query_params.get("token"))
+        decoded_token = VerifyAuthEmailUtil.verify_jwt_token(
+            request.query_params.get("token")
+        )
 
         # 2. Check if email is already verified
         user_id = decoded_token["user_id"]
@@ -60,15 +63,7 @@ def verify_email(request):
             raise ValueError("Email is already verified")
 
         # 3. Check six-digit code, that we put for extra security & delete it
-        code = decoded_token["data"]["code"]
-        email_type = decoded_token["data"]["email_type"]
-        email_verification_instance = EmailVerification.objects.get(
-            user=user_id, code=code, email_type=email_type
-        )
-        if not email_verification_instance:
-            raise InvalidToken("Token code is invalid or expired")
-
-        email_verification_instance.delete()
+        VerifyAuthEmailUtil.verify_code(decoded_token)
 
         # 4. Mark email as verified
         user.is_email_verified = True
@@ -149,35 +144,23 @@ def send_password_reset_email(request):
 @api_view(["POST"])
 def reset_password(request):
     try:
-        # 1. Verify token
-        decoded_token = JWTUtil.verify_token(request.query_params.get("token"))
+        # 1. Request Data Validation
+        ser = ResetPasswordSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
 
-        # 2. Check if email is already verified
-        user_id = decoded_token["user_id"]
-        user = User.objects.get(pk=user_id)
-        if not user:
-            raise InvalidToken("Token is invalid or expired")
+        # 2. Token verification
+        decoded_token = JWTUtil.verify_token(ser.validated_data["token"])
 
-        if user.is_email_verified:
-            raise ValueError("Email is already verified")
+        # 3. Code verification
+        VerifyAuthEmailUtil.verify_code(decoded_token)
 
-        # 3. Check six-digit code, that we put for extra security & delete it
-        code = decoded_token["data"]["code"]
-        email_type = decoded_token["data"]["email_type"]
-        email_verification_instance = EmailVerification.objects.get(
-            user=user_id, code=code, email_type=email_type
-        )
-        if not email_verification_instance:
-            raise InvalidToken("Token code is invalid or expired")
-
-        email_verification_instance.delete()
-
-        # 4. Mark email as verified
-        user.is_email_verified = True
+        # 4. Reset password
+        user = User.objects.get(pk=decoded_token["user_id"])
+        user.set_password(ser.validated_data["password"])
         user.save()
 
         # 5. Send response
-        return Response("Email verified successfully")
+        return Response("Your password has been reset successfully.")
     except (InvalidToken, ValueError) as e:
         return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 

@@ -28,7 +28,7 @@ urlpatterns = [
         name="reset-password",
     ),
     # 3. GET ACCOUNT
-    path("/my-account/", user_view.user_get, name="get-account"),
+    path("/me/", user_view.user_get, name="get-account"),
     # 4. UPDATE ACCOUNT
     path("/update/", user_view.user_update, name="update-account"),
     # 5. DELETE ACCOUNT

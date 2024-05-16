@@ -1,7 +1,6 @@
 # Packages
-
 from rest_framework import serializers
-from django.shortcuts import reverse
+import re
 
 
 # Models
@@ -61,3 +60,37 @@ class UserSerializer(serializers.ModelSerializer):
 
 class EmailSerializer(serializers.Serializer):
     email = serializers.EmailField()
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    password = serializers.CharField()
+    password_confirm = serializers.CharField()
+
+    def validate(self, data):
+        password = data.get("password")
+        password_confirm = data.get("password_confirm")
+
+        # Check if passwords match
+        if password != password_confirm:
+            raise serializers.ValidationError("Passwords do not match.")
+
+        # Check if password meets strength requirements
+        # if not self.is_strong_password(password):
+        #     raise serializers.ValidationError(
+        #         "Password must be 8 characters long and contain at least one upper case letter, one lowercase letter, one digit, and one special character."
+        #     )
+        return data
+
+    def is_strong_password(self, password):
+        # Define regex pattern for strong password requirements
+        pattern = (
+            r"^(?=.*[A-Z])"  # At least one uppercase letter
+            r"(?=.*[a-z])"  # At least one lowercase letter
+            r"(?=.*\d)"  # At least one digit
+            r"(?=.*[@$!%*#?&])"  # At least one special character
+            r".{8,}$"  # At least 8 characters long
+        )
+
+        # Check if password matches the regex pattern
+        return bool(re.match(pattern, password))

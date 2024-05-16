@@ -1,2 +1,2 @@
 from .register_util import RegisterUtil
-from .email_util import SendAuthEmailUtil, VerifyAuthEmailUtil, EmailContentUtil
+from .auth_email_util import SendAuthEmailUtil, VerifyAuthEmailUtil
