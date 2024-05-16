@@ -1,4 +1,5 @@
-# PACKAGES
+# Packages
+from django.contrib.auth.hashers import check_password
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import (
@@ -9,6 +10,7 @@ from rest_framework.decorators import (
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from django.shortcuts import get_object_or_404, reverse
+from rest_framework.views import APIView
 
 # MODELS
 from apps.authentication.models import User
@@ -16,9 +18,11 @@ from apps.authentication.models import EmailVerification
 
 # SERIALIZER
 from apps.authentication.serializers.user.user_serializer import (
-    UserSerializer,
+    RegisterUserSerializer,
     EmailSerializer,
     ResetPasswordSerializer,
+    ChangePasswordSerializer,
+    UserUpdateSerializer,
 )
 
 # UTILS
@@ -30,7 +34,7 @@ from utils.exceptions import InvalidToken
 @api_view(["POST"])
 def user_create(request):
     # Validation
-    serializer = UserSerializer(data=request.data, context={"request": request})
+    serializer = RegisterUserSerializer(data=request.data, context={"request": request})
     serializer.is_valid(raise_exception=True)  # throw exception and don't proceed
 
     # Save data, serializer crate() will be called on
@@ -103,7 +107,7 @@ def resend_email_verification_email(request):
 def user_get(request):
     try:
         user = User.objects.get(pk=request.user.id)
-        serializer = UserSerializer(user)
+        serializer = RegisterUserSerializer(user)
         return Response(serializer.data)
     except User.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
@@ -175,3 +179,37 @@ def user_delete(request):
 @permission_classes([IsAuthenticated])
 def user_update(request):
     return Response("Update is pending")
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    return Response("Change password is pending")
+
+
+class UpdateUser(APIView):
+    def put(self, request):
+        # 1. Validation
+        ser = UserUpdateSerializer(
+            instance=request.user, data=request.data, partial=True
+        )
+        ser.is_valid(raise_exception=True)
+        # 2. Action - Update password
+        ser.save()
+        # 3. Response
+        return Response("Updated successfully")
+
+
+class ChangePassword(APIView):
+    permission_classes = IsAuthenticated
+
+    def post(self, request):
+        # 1. Validation
+        ser = ChangePasswordSerializer(data=request.data, context={"request": request})
+        ser.is_valid(raise_exception=True)
+        # 2. Action - Change Password
+        user = request.user
+        user.set_password(ser.validated_data["password"])
+        user.save()
+        # 3. Response
+        return Response("Password changed successfully.")

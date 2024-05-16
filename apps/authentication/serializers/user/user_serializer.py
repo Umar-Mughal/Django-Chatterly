@@ -1,17 +1,16 @@
 # Packages
+from django.contrib.auth.hashers import check_password
 from rest_framework import serializers
-import re
-
 
 # Models
 from apps.authentication.models import User
 from apps.authentication.models import EmailVerification
 
 # Utils
-from apps.authentication.utils import RegisterUtil, SendAuthEmailUtil
+from apps.authentication.utils import UserUtil, SendAuthEmailUtil
 
 
-class UserSerializer(serializers.ModelSerializer):
+class RegisterUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
@@ -35,7 +34,7 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         email = validated_data["email"].lower()
         validated_data["email"] = email
-        validated_data["username"] = RegisterUtil.generate_unique_username(
+        validated_data["username"] = UserUtil.generate_unique_username(
             validated_data["email"]
         )
 
@@ -47,6 +46,7 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
     def update(self, instance, validated_data):
+        # raise serializers.ValidationError("Password is not allowed to update")
         password = validated_data.pop(
             "password", None
         )  # Remove password from validated data if not provided
@@ -54,6 +54,25 @@ class UserSerializer(serializers.ModelSerializer):
             instance.set_password(password)
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
+        instance.save()
+        return instance
+
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = [
+            "first_name",
+            "last_name",
+            "gender",
+            "date_of_birth",
+        ]
+
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
         instance.save()
         return instance
 
@@ -68,29 +87,19 @@ class ResetPasswordSerializer(serializers.Serializer):
     password_confirm = serializers.CharField()
 
     def validate(self, data):
-        password = data.get("password")
-        password_confirm = data.get("password_confirm")
-
-        # Check if passwords match
-        if password != password_confirm:
-            raise serializers.ValidationError("Passwords do not match.")
-
-        # Check if password meets strength requirements
-        # if not self.is_strong_password(password):
-        #     raise serializers.ValidationError(
-        #         "Password must be 8 characters long and contain at least one upper case letter, one lowercase letter, one digit, and one special character."
-        #     )
+        err = UserUtil.validate_password(self, data)
+        if err["status"]:
+            raise serializers.ValidationError(err["msg"])
         return data
 
-    def is_strong_password(self, password):
-        # Define regex pattern for strong password requirements
-        pattern = (
-            r"^(?=.*[A-Z])"  # At least one uppercase letter
-            r"(?=.*[a-z])"  # At least one lowercase letter
-            r"(?=.*\d)"  # At least one digit
-            r"(?=.*[@$!%*#?&])"  # At least one special character
-            r".{8,}$"  # At least 8 characters long
-        )
 
-        # Check if password matches the regex pattern
-        return bool(re.match(pattern, password))
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    password = serializers.CharField(required=True)
+    password_confirm = serializers.CharField(required=True)
+
+    def validate(self, data):
+        err = UserUtil.validate_password(self, data)
+        if err["status"]:
+            raise serializers.ValidationError(err["msg"])
+        return data
