@@ -58,7 +58,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         return instance
 
 
-class UserUpdateSerializer(serializers.ModelSerializer):
+class UpdateUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User

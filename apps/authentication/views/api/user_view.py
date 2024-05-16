@@ -22,7 +22,7 @@ from apps.authentication.serializers.user.user_serializer import (
     EmailSerializer,
     ResetPasswordSerializer,
     ChangePasswordSerializer,
-    UserUpdateSerializer,
+    UpdateUserSerializer,
 )
 
 # UTILS
@@ -113,13 +113,6 @@ def user_get(request):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-# @api_view(["POST"])
-# def send_password_reset_email(request):
-#     return Response(
-#         "Sending password reset email is pending. This will be trigerred when forntend will send an email in forgot password"
-#     )
-
-
 @api_view(["POST"])
 def send_password_reset_email(request):
     # 1. Validation
@@ -137,12 +130,6 @@ def send_password_reset_email(request):
         SendAuthEmailUtil.EMAIL_TYPES["reset_password"],
     )
     return Response("Password reset link sent. Please check your email.")
-
-
-# @api_view(["POST"])
-# def reset_password(request):
-#     # A user will submit request with the token which was sent in send_password_reset_email
-#     return Response("Reset your password Pending") @ api_view(["POST"])
 
 
 @api_view(["POST"])
@@ -190,7 +177,7 @@ def change_password(request):
 class UpdateUser(APIView):
     def put(self, request):
         # 1. Validation
-        ser = UserUpdateSerializer(
+        ser = UpdateUserSerializer(
             instance=request.user, data=request.data, partial=True
         )
         ser.is_valid(raise_exception=True)
