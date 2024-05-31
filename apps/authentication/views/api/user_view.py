@@ -95,8 +95,7 @@ def resend_email_verification_email(request):
 
     # 4. Send email
     SendAuthEmailUtil.send_verification_email(
-        request,
-        user,
+        user.id,
         SendAuthEmailUtil.EMAIL_TYPES["register"],
     )
     return Response("Verification email sent. Please check your email")
@@ -125,8 +124,7 @@ def send_password_reset_email(request):
 
     # 3. Send email
     SendAuthEmailUtil.send_verification_email(
-        request,
-        user,
+        user.id,
         SendAuthEmailUtil.EMAIL_TYPES["reset_password"],
     )
     return Response("Password reset link sent. Please check your email.")

@@ -41,7 +41,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(validated_data)
         request = self.context.get("request")
         SendAuthEmailUtil.send_verification_email(
-            request, user, SendAuthEmailUtil.EMAIL_TYPES["register"]
+            user.id, SendAuthEmailUtil.EMAIL_TYPES["register"]
         )
         return user
 

@@ -6,6 +6,9 @@ from apps.post.models import Post
 from apps.post.serializers.post_serializer import PostSerializer
 import time
 
+# TASKS
+from apps.post.tasks import post_task
+
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
@@ -16,7 +19,8 @@ class PostViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-class UploadPost(views.APIView):
+class UploadVideoPost(views.APIView):
     def post(self, request):
-        time.sleep(2)
-        return Response("hello World")
+        result = post_task.upload_video.delay(2, 3)
+        print("result -------", result)
+        return Response({result.task_id})

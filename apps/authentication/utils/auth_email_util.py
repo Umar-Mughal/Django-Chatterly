@@ -9,6 +9,10 @@ from django.conf import settings
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import InvalidToken as SimpleJWTInvalidToken
+from celery import shared_task
+import time
+from django.conf import settings
+from apps.authentication.models import User
 
 # Models
 from apps.authentication.models import EmailVerification
@@ -23,23 +27,30 @@ class SendAuthEmailUtil:
     MODEL = EmailVerification
 
     @staticmethod
-    def send_verification_email(request, user, email_type):
-        # 1. Get six-digit code
+    def send_verification_email(user_id, email_type):
+        result = SendAuthEmailUtil.send_email.delay(user_id, email_type)
+
+    @staticmethod
+    @shared_task
+    def send_email(userid, email_type):
+        # 1. Get User
+        user = User.objects.get(id=userid)
+
+        # 2. Get six-digit code
         code = SendAuthEmailUtil.generate_verification_code(user, email_type)
 
-        # 2. Generate jwt token with custom payload (including code)
+        # 3. Generate jwt token with custom payload (including code)
         jwt_data = {"user": user, "code": code, "email_type": email_type}
         access_token = SendAuthEmailUtil.generate_jwt_access_token(jwt_data)
 
-        # 3. Build page URL
-        route = SendAuthEmailUtil.get_route(email_type)
-        url = request.build_absolute_uri(route + "?token=" + str(access_token))
+        # 4. Build page URL
+        relative_link = SendAuthEmailUtil.get_route(email_type)
+        url = f"{settings.SITE_URL}{relative_link}?token={str(access_token)}"
 
-        # 4. Get email content (subject, body, attachment etc)
-        # subject, body = email_content(user, url)
+        # 5. Get email content (subject, body, attachment etc)
         subject, body = SendAuthEmailUtil.get_email_content(email_type, user, url)
 
-        # Send email
+        # 6. Send email
         EmailUtil.send_email({"to": [user.email], "subject": subject, "body": body})
 
     @classmethod
