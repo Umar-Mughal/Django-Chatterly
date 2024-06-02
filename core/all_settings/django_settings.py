@@ -34,6 +34,7 @@ def installed_apps():
         "rest_framework",
         "django_extensions",
         "corsheaders",
+        "django_celery_results",
     ]
 
 
